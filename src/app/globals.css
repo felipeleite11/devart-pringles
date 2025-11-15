@@ -22,5 +22,26 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Poppins, sans-serif;
+}
+
+.slide {
+  display: flex;
+  justify-content: space-between;
+  gap: 96px;
+  position: absolute;
+  width: 100vw;
+  overflow: hidden;
+  height: 94vh;
+  padding: 11rem 11rem 11rem 0;
+  opacity: 0;
+  clip-path: circle(0% at 87% 50%);
+  transition: clip-path 0s 1s, opacity 0s 1s;
+
+  &.active {
+    z-index: 1;
+    opacity: 1;
+    clip-path: circle(130% at 87% 50%);
+    transition: clip-path 1s ease 0s, opacity 0.1s 0s;
+  }
 }
