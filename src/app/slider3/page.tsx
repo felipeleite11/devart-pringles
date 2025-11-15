@@ -4,32 +4,15 @@ import React, { useState, useEffect, useRef } from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { gsap, ScrollTrigger, SplitText } from 'gsap/all'
 
-const slides = [
-    { 
-		id: 1, 
-		color: 'bg-linear-to-r from-red-600 to-red-700',
-		title: 'Original',
-		details: 'Pringles Original: o sabor autêntico da batata que eleva cada momento com qualidade e crocância incomparáveis.',
-		product: '/images/original.png',
-		image: '/images/sabor batata.png'
-	},
-    { 
-		id: 2, 
-		color: 'bg-linear-to-r from-emerald-600 to-emerald-700',
-		title: 'Creme & Cebola',
-		details: 'Pringles Creme e Cebola: uma combinação irresistível de sabor e frescor que transforma cada pausa em uma experiência premium.',
-		product: '/images/cebola.png',
-		image: '/images/sabor cebola.png'
-	},
-    { 
-		id: 3, 
-		color: 'bg-linear-to-r from-purple-800 to-purple-900',
-		title: 'Bacon',
-		details: 'Pringles Bacon: o sabor intenso e defumado que entrega uma experiência irresistivelmente crocante a cada mordida.',
-		product: '/images/bacon.png',
-		image: '/images/sabor bacon.jpg'
-	}
-]
+interface AnimationRefs {
+	title: React.RefObject<HTMLHeadingElement | null>
+	details: React.RefObject<HTMLParagraphElement | null>
+	cta: React.RefObject<HTMLButtonElement | null>
+	image: React.RefObject<HTMLImageElement | null>
+	product: React.RefObject<HTMLImageElement | null>
+	nextProduct: React.RefObject<HTMLImageElement | null>
+	lastProduct: React.RefObject<HTMLImageElement | null>
+}
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
@@ -37,16 +20,85 @@ export default function Slider() {
 	const container = useRef<HTMLDivElement>(null)
 	const title1 = useRef<HTMLHeadingElement>(null)
 	const title2 = useRef<HTMLHeadingElement>(null)
+	const title3 = useRef<HTMLHeadingElement>(null)
 	const text1 = useRef<HTMLParagraphElement>(null)
 	const text2 = useRef<HTMLParagraphElement>(null)
+	const text3 = useRef<HTMLParagraphElement>(null)
 	const cta1 = useRef<HTMLButtonElement>(null)
 	const cta2 = useRef<HTMLButtonElement>(null)
+	const cta3 = useRef<HTMLButtonElement>(null)
 	const image1 = useRef<HTMLImageElement>(null)
 	const image2 = useRef<HTMLImageElement>(null)
+	const image3 = useRef<HTMLImageElement>(null)
 	const currentProduct1 = useRef<HTMLImageElement>(null)
 	const currentProduct2 = useRef<HTMLImageElement>(null)
+	const currentProduct3 = useRef<HTMLImageElement>(null)
 	const nextProduct1 = useRef<HTMLImageElement>(null)
 	const nextProduct2 = useRef<HTMLImageElement>(null)
+	const nextProduct3 = useRef<HTMLImageElement>(null)
+	const lastProduct1 = useRef<HTMLImageElement>(null)
+	const lastProduct2 = useRef<HTMLImageElement>(null)
+	const lastProduct3 = useRef<HTMLImageElement>(null)
+
+	const slides = [
+		{ 
+			id: 1, 
+			color: 'bg-linear-to-r from-red-600 to-red-700',
+			title: 'Original',
+			details: 'Pringles Original: o sabor autêntico da batata que eleva cada momento com qualidade e crocância incomparáveis.',
+			product: '/images/original.png',
+			nextProduct: '/images/cebola.png',
+			lastProduct: '/images/bacon.png',
+			image: '/images/sabor batata.png',
+			refs: {
+				title: title1,
+				details: text1,
+				cta: cta1,
+				image: image1,
+				product: currentProduct1,
+				nextProduct: nextProduct1,
+				lastProduct: lastProduct1
+			}
+		},
+		{ 
+			id: 2, 
+			color: 'bg-linear-to-r from-[#5eb249] to-[#1f7c0d]',
+			title: 'Creme & Cebola',
+			details: 'Pringles Creme e Cebola: uma combinação irresistível de sabor e frescor que transforma cada pausa em uma experiência premium.',
+			product: '/images/cebola.png',
+			nextProduct: '/images/bacon.png',
+			lastProduct: '/images/original.png',
+			image: '/images/sabor cebola.png',
+			refs: {
+				title: title2,
+				details: text2,
+				cta: cta2,
+				image: image2,
+				product: currentProduct2,
+				nextProduct: nextProduct2,
+				lastProduct: lastProduct2
+			}
+		},
+		{ 
+			id: 3, 
+			color: 'bg-linear-to-r from-[#7445a6] to-[#552284]',
+			title: 'Bacon',
+			details: 'Pringles Bacon: o sabor intenso e defumado que entrega uma experiência irresistivelmente crocante a cada mordida.',
+			product: '/images/bacon.png',
+			nextProduct: '/images/original.png',
+			lastProduct: '/images/cebola.png',
+			image: '/images/sabor bacon.jpg',
+			refs: {
+				title: title3,
+				details: text3,
+				cta: cta3,
+				image: image3,
+				product: currentProduct3,
+				nextProduct: nextProduct3,
+				lastProduct: lastProduct3
+			}
+		}
+	]
 	
     const [currentIndex, setCurrentIndex] = useState(0)
     const [animatingToIndex, setAnimatingToIndex] = useState<number | null>(null)
@@ -56,7 +108,7 @@ export default function Slider() {
 
     const isAnimating = animatingToIndex !== null
 
-    const handleNavigate = (direction: 'next' | 'prev') => {
+    function handleNavigate(direction: 'next' | 'prev') {
         if (isAnimating) return
 
         const newIndex = direction === 'next'
@@ -65,6 +117,62 @@ export default function Slider() {
 
         setAnimatingToIndex(newIndex)
     }
+
+	function animateTexts({ title, details, cta, image, product, nextProduct, lastProduct }: AnimationRefs) {
+		const splitedTitle = new SplitText(title.current, {
+			type: 'chars, words'
+		})
+
+		gsap.from(splitedTitle.chars, {
+			opacity: 0,
+			y: 50,
+			stagger: 0.05,
+			duration: 0.3,
+			delay: 0.3
+		})
+
+		gsap.from(details.current, {
+			opacity: 0,
+			y: 50,
+			duration: 0.4,
+			delay: 0.4
+		})
+
+		gsap.from(cta.current, {
+			opacity: 0,
+			y: 30,
+			duration: 0.3,
+			delay: 0.7
+		})
+
+		gsap.from(image.current, {
+			rotate: -180,
+			duration: 0.3,
+			delay: 0.5
+		})
+
+		gsap.to(product.current, {
+			scale: 0.4,
+			opacity: 0,
+			transformOrigin: 'bottom'
+		})
+
+		gsap.to(nextProduct.current, {
+			scale: 1.25,
+			x: -168,
+			transformOrigin: 'bottom'
+		})
+
+		gsap.to(lastProduct.current, {
+			scale: 1.14,
+			x: -144,
+			y: -17,
+			opacity: 1,
+			transformOrigin: 'bottom',
+			delay: 0.5,
+			duration: 0.4
+		})
+	}
 
     useEffect(() => {
         if (animatingToIndex === null) return
@@ -77,6 +185,10 @@ export default function Slider() {
                 transition: 'clip-path 800ms ease-in-out'
             })
         })
+
+		const nextSlide = slides[animatingToIndex]
+
+		animateTexts(nextSlide.refs)
         
         // After the animation duration, clean up the state
         const timer = setTimeout(() => {
@@ -89,10 +201,9 @@ export default function Slider() {
             setClipPathStyle({
                 clipPath: 'circle(0% at 87% 50%)'
             })
-        }, 800)
+        }, 1000)
 
         return () => clearTimeout(timer)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [animatingToIndex])
 
     return (
@@ -102,17 +213,20 @@ export default function Slider() {
 				<div className="flex justify-between gap-32 p-24 pl-0 items-center">
 					<div className="w-60 select-none">
 						<div className="w-120">
-							<img ref={image1} src={slides[currentIndex].image} alt="" className="rounded-full w-100 h-100 -translate-x-1/2 object-cover shadow-lg" />
+							<img ref={slides[currentIndex].refs.image} src={slides[currentIndex].image} alt="" className="rounded-full w-100 h-100 -translate-x-1/2 object-cover shadow-lg" />
 						</div>
 					</div>
 
 					<div className="flex flex-col gap-12 flex-1">
-						<h1 ref={title1} className="font-black text-5xl">{slides[currentIndex].title}</h1>
-						<p ref={text1} className="leading-relaxed text-sm w-120">{slides[currentIndex].details}</p>
-						<button ref={cta1} className="uppercase p-3 bg-white rounded-md text-slate-800 font-medium w-fit">Ver na loja</button>
+						<h1 ref={slides[currentIndex].refs.title} className="font-black text-5xl">{slides[currentIndex].title}</h1>
+						<p ref={slides[currentIndex].refs.details} className="leading-relaxed text-sm w-120">{slides[currentIndex].details}</p>
+						<button ref={slides[currentIndex].refs.cta} className="uppercase p-3 bg-white rounded-md text-slate-800 font-medium w-fit">Ver na loja</button>
 					</div>
 
-					<img ref={currentProduct1} src={slides[currentIndex].product} alt="Produto" className="w-40" />
+					<div className="flex gap-6 items-end">
+						<img ref={slides[currentIndex].refs.product} src={slides[currentIndex].product} alt="Produto" className="w-40" />
+						<img ref={slides[currentIndex].refs.nextProduct} src={slides[currentIndex].nextProduct} alt="Próximo produto" className="w-32 -translate-y-4 cursor-pointer" onClick={() => handleNavigate('next')} />
+					</div>
 				</div>
 			</div>
 
@@ -126,17 +240,21 @@ export default function Slider() {
 					<div className="flex justify-between gap-32 p-24 pl-0 items-center">
 						<div className="w-60 select-none">
 							<div className="w-120">
-								<img ref={image2} src={slides[animatingToIndex].image} alt="" className="rounded-full w-100 h-100 -translate-x-1/2 object-cover shadow-lg" />
+								<img ref={slides[animatingToIndex].refs.image} src={slides[animatingToIndex].image} alt="" className="rounded-full w-100 h-100 -translate-x-1/2 object-cover shadow-lg" />
 							</div>
 						</div>
 
 						<div className="flex flex-col gap-12 flex-1">
-							<h1 ref={title2} className="font-black text-5xl">{slides[animatingToIndex].title}</h1>
-							<p ref={text2} className="leading-relaxed text-sm w-120">{slides[animatingToIndex].details}</p>
-							<button ref={cta2} className="uppercase p-3 bg-white rounded-md text-slate-800 font-medium w-fit">Ver na loja</button>
+							<h1 ref={slides[animatingToIndex].refs.title} className="font-black text-5xl">{slides[animatingToIndex].title}</h1>
+							<p ref={slides[animatingToIndex].refs.details} className="leading-relaxed text-sm w-120">{slides[animatingToIndex].details}</p>
+							<button ref={slides[animatingToIndex].refs.cta} className="uppercase p-3 bg-white rounded-md text-slate-800 font-medium w-fit">Ver na loja</button>
 						</div>
 
-						<img ref={currentProduct2} src={slides[animatingToIndex].product} alt="Produto" className="w-40" />
+						<div className="flex gap-6 items-end">
+							<img ref={slides[animatingToIndex].refs.product} src={slides[animatingToIndex].product} alt="Produto" className="w-40" />
+							<img ref={slides[animatingToIndex].refs.nextProduct} src={slides[animatingToIndex].product} alt="Próximo produto" className="w-32" />
+							<img ref={slides[animatingToIndex].refs.lastProduct} src={slides[animatingToIndex].nextProduct} alt="Próximo produto" className="w-28 opacity-1" />
+						</div>
 					</div>
 				</div>
             )}
